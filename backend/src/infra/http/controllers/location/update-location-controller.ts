@@ -11,22 +11,34 @@ export async function updateLocationController(
     id: z.string().uuid(),
   });
 
-  const bodySchema = z.object({
-    name: z.string().min(3),
-    address: z.string().min(5),
-  });
+  const bodySchema = z
+    .object({
+      name: z.string().min(3).optional(),
+      address: z.string().min(5).optional(),
+      maxTables: z.number().int().positive().optional(),
+      maxSeatsPerTable: z.number().int().positive().optional(),
+    })
+    .refine((data) => Object.keys(data).length > 0, {
+      message: "Informe ao menos um campo para atualização.",
+    });
 
   const { id } = paramsSchema.parse(request.params);
-  const { name, address } = bodySchema.parse(request.body);
+  const parsedPayload = bodySchema.parse(request.body);
+
+    const payload = Object.fromEntries(
+    Object.entries(parsedPayload).filter(([, value]) => value !== undefined)
+  ) as Partial<{
+    name: string;
+    address: string;
+    maxTables: number;
+    maxSeatsPerTable: number;
+  }>;
 
     const updateLocation = makeUpdateLocation();
 
-    const { location } = await updateLocation.execute(id, {
-      name,
-      address,
-    });
+  const { location } = await updateLocation.execute(id, payload);
 
-return reply.status(200).send({
+  return reply.status(200).send({
     locationId: location.id,
   });
 }

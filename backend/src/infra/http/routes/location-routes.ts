@@ -14,16 +14,12 @@ export async function locationRoutes(app: FastifyInstance) {
         body: {
           type: "object",
           properties: {
-            name: {
-              type: "string",
-              minLength: 3,
-            },
-            address: {
-              type: "string",
-              minLength: 5,
-            },
+            name: { type: "string", minLength: 3 },
+            address: { type: "string", minLength: 5 },
+            maxTables: { type: "integer", minimum: 1 },
+            maxSeatsPerTable: { type: "integer", minimum: 1 },
           },
-          required: ["name", "address"],
+          required: ["name", "address", "maxTables", "maxSeatsPerTable"],
         },
         response: {
           201: {
@@ -31,11 +27,9 @@ export async function locationRoutes(app: FastifyInstance) {
             content: {
               "application/json": {
                 schema: {
-  type: "object",
-  properties: {
-    locationId: { type: "string" }
-  }
-},
+                type: "object",
+                  properties: { locationId: { type: "string" } },
+                },
               },
             },
           },
@@ -44,11 +38,11 @@ export async function locationRoutes(app: FastifyInstance) {
             content: {
               "application/json": {
                 schema: {
-  type: "object",
-  properties: {
-    message: { type: "string" }
-  }
-},
+                type: "object",
+                properties: {
+                  message: { type: "string" }
+                }
+              },
               },
             },
           },
@@ -58,27 +52,31 @@ export async function locationRoutes(app: FastifyInstance) {
     createLocationController
   );
 
-  app.get("/locations", {
-    schema: {
-      tags: ["Locations"],
-      summary: "List all locations",
-      response: {
-        200: {
-          description: "Locations list",
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  locations: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        id: { type: "string" },
-                        name: { type: "string" },
-                        address: { type: "string" },
-                      },
+  app.get(
+    "/locations",
+    {
+      schema: {
+        tags: ["Locations"],
+        summary: "List all locations",
+        response: {
+          200: {
+            description: "Locations list",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    locations: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          id: { type: "string" },
+                          name: { type: "string" },
+                          address: { type: "string" },
+                          maxTables: { type: "integer" },
+                          maxSeatsPerTable: { type: "integer" },
+                        },
                     },
                   },
                 },
@@ -90,25 +88,29 @@ export async function locationRoutes(app: FastifyInstance) {
     },
   }, listLocationsController);
 
-  app.get("/locations/:id", {
-    schema: {
-      tags: ["Locations"],
-      summary: "Get a location by id",
-      response: {
-        200: {
-          description: "Location found",
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  location: {
-                    type: "object",
-                    properties: {
-                      id: { type: "string" },
-                      name: { type: "string" },
-                      address: { type: "string" },
-                    },
+  app.get(
+    "/locations/:id",
+    {
+      schema: {
+        tags: ["Locations"],
+        summary: "Get a location by id",
+        response: {
+          200: {
+            description: "Location found",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    location: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                        name: { type: "string" },
+                        address: { type: "string" },
+                        maxTables: { type: "integer" },
+                        maxSeatsPerTable: { type: "integer" },
+                      },
                   },
                 },
               },
@@ -116,14 +118,14 @@ export async function locationRoutes(app: FastifyInstance) {
           },
         },
         400: {
-          description: "Location not found",
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  message: { type: "string" },
-                },
+            description: "Location not found",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string" },
+                  },
               },
             },
           },
@@ -132,33 +134,31 @@ export async function locationRoutes(app: FastifyInstance) {
     },
   }, getByIdLocationController);
 
-  app.put("/locations/:id", {
-    schema: {
-      tags: ["Locations"],
-      summary: "Update a location by id",
-      body: {
-        type: "object",
-        properties: {
-          name: {
-            type: "string",
-            minLength: 3,
-          },
-          address: {
-            type: "string",
-            minLength: 5,
-          },
+  app.put(
+    "/locations/:id",
+    {
+      schema: {
+        tags: ["Locations"],
+        summary: "Update a location by id",
+        body: {
+          type: "object",
+          properties: {
+            name: { type: "string", minLength: 3 },
+            address: { type: "string", minLength: 5 },
+            maxTables: { type: "integer", minimum: 1 },
+            maxSeatsPerTable: { type: "integer", minimum: 1 },
         },
-        required: ["name", "address"],
-      },
-      response: {
-        200: {
-          description: "Location updated",
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  locationId: { type: "string" },
+        minProperties: 1,
+        response: {
+          200: {
+            description: "Location updated",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    locationId: { type: "string" },
+                  },
                 },
               
               },
@@ -166,14 +166,14 @@ export async function locationRoutes(app: FastifyInstance) {
           },
         },
         400: {
-          description: "Location not found",
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  message: { type: "string" },
-                },
+            description: "Location not found",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string" },
+                  },
               },
             },
           },

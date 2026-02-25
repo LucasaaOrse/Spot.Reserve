@@ -43,7 +43,7 @@ export class PrismaEventRepository implements EventRepository {
     });
 
     return events.map(
-      (event) =>
+      (event: any) =>
         new Event(
           {
             title: event.title,

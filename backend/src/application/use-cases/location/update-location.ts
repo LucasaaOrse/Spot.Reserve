@@ -1,5 +1,5 @@
 import type { LocationRepository } from "../../../domain/repositories/location-repository";
-import { Location } from "../../../domain/entities/location";
+import { AppError } from "../../errors/app-error";
 
 export class UpdateLocation {
   constructor(private locationRepository: LocationRepository) {}
@@ -16,7 +16,7 @@ export class UpdateLocation {
     const location = await this.locationRepository.findById(id);
 
     if (!location) {
-      throw new Error("Location not found");
+      throw new AppError("Location not found", 404);
     }
 
     location.update(data);

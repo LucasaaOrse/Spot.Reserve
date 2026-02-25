@@ -1,5 +1,6 @@
 import type { InvitationRepository } from "../../../domain/repositories/invitation-repository";
 import type { ReservationRepository } from "../../../domain/repositories/reservation-repository";
+import { AppError } from "../../errors/app-error";
 
 interface SwitchReservationSeatRequest {
   eventId: string;
@@ -22,7 +23,10 @@ export class SwitchReservationSeatUseCase {
       await this.invitationRepository.findAcceptedByGuestAndEvent(userId, eventId);
 
     if (!acceptedInvitation) {
-      throw new Error("Usuário não possui convite aceito para este evento.");
+      throw new AppError(
+        "Usuário não possui convite aceito para este evento.",
+        403
+      );
     }
 
     const seatBelongsToEvent = await this.reservationRepository.seatBelongsToEvent(
@@ -31,7 +35,7 @@ export class SwitchReservationSeatUseCase {
     );
 
     if (!seatBelongsToEvent) {
-      throw new Error("Assento inválido para este evento.");
+      throw new AppError("Assento inválido para este evento.", 400);
     }
 
     const seatAlreadyTaken = await this.reservationRepository.findByEventAndSeat(
@@ -40,15 +44,22 @@ export class SwitchReservationSeatUseCase {
     );
 
     if (seatAlreadyTaken && seatAlreadyTaken.userId !== userId) {
-      throw new Error("Este assento já está ocupado.");
+      throw new AppError("Este assento já está ocupado.", 409);
     }
 
-    const reservation = await this.reservationRepository.switchSeat({
-      eventId,
-      userId,
-      newSeatId,
-    });
+    try {
+      const reservation = await this.reservationRepository.switchSeat({
+        eventId,
+        userId,
+        newSeatId,
+      });
 
     return { reservation };
+    } catch {
+      throw new AppError(
+        "Não foi possível trocar o assento. Tente novamente.",
+        409
+      );
+    }
   }
 }

@@ -53,6 +53,17 @@ export class Location {
       throw new Error("Nome da localidade muito curto.");
     }
 
+    if (data.maxTables !== undefined && data.maxTables <= 0) {
+      throw new Error("A localidade deve permitir pelo menos 1 mesa.");
+    }
+
+    if (
+      data.maxSeatsPerTable !== undefined &&
+      data.maxSeatsPerTable <= 0
+    ) {
+      throw new Error("Cada mesa deve permitir pelo menos 1 cadeira.");
+    }
+
     this.props = {
       ...this.props,
       ...data,

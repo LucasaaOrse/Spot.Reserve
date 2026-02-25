@@ -39,7 +39,7 @@ export class PrismaLocationRepository implements LocationRepository {
     const locations = await this.prisma.location.findMany();
 
     return locations.map(
-      (location) =>
+      (location: any) =>
         new Location(
           {
             name: location.name,

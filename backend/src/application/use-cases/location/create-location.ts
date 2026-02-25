@@ -19,14 +19,16 @@ export class CreateLocation {
   async execute({
     name,
     address,
+    maxTables,
+    maxSeatsPerTable,
   }: CreateLocationRequest): Promise<CreateLocationResponse> {
 
     // 1️⃣ Cria a entidade (roda validações automaticamente)
     const location = new Location({
       name,
       address,
-      maxTables: 1,
-      maxSeatsPerTable: 1
+      maxTables,
+      maxSeatsPerTable,
     });
 
     // 2️⃣ Persiste via repositório

@@ -1,26 +1,38 @@
-// src/application/use-cases/event/update-event-use-case.ts
-
+import { AppError } from "../../errors/app-error";
 import type { EventRepository } from "../../../domain/repositories/event-repository";
 
 
 interface UpdateEventRequest {
   eventId: string;
-  title?: string | undefined;               // Adicione o | undefined explicitamente
-  description?: string | null | undefined;   // Adicione o | undefined explicitamente
-  date?: Date | undefined;                  // Adicione o | undefined explicitamente
+  organizerId: string;
+  title?: string | undefined;
+  description?: string | null | undefined;
+  date?: Date | undefined;
 }
 
 export class UpdateEventUseCase {
   constructor(private eventRepository: EventRepository) {}
 
-  async execute({ eventId, title, description, date }: UpdateEventRequest) {
+  async execute({
+    eventId,
+    organizerId,
+    title,
+    description,
+    date,
+  }: UpdateEventRequest) {
     const event = await this.eventRepository.findById(eventId);
 
     if (!event) {
-      throw new Error("Evento não encontrado.");
+      throw new AppError("Evento não encontrado.", 404);
     }
 
-    // Usando os métodos da classe em vez de atribuição direta
+    if (event.organizerId !== organizerId) {
+      throw new AppError(
+        "Acesso negado: evento não pertence ao organizador.",
+        403
+      );
+    }
+
     if (title) {
       event.rename(title);
     }

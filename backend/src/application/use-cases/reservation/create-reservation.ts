@@ -1,5 +1,6 @@
 import type { InvitationRepository } from "../../../domain/repositories/invitation-repository";
 import type { ReservationRepository } from "../../../domain/repositories/reservation-repository";
+import { AppError } from "../../errors/app-error";
 
 interface CreateReservationRequest {
   eventId: string;
@@ -18,7 +19,10 @@ export class CreateReservationUseCase {
       await this.invitationRepository.findAcceptedByGuestAndEvent(userId, eventId);
 
     if (!acceptedInvitation) {
-      throw new Error("Usuário não possui convite aceito para este evento.");
+      throw new AppError(
+        "Usuário não possui convite aceito para este evento.",
+        403
+      );
     }
 
     const seatBelongsToEvent = await this.reservationRepository.seatBelongsToEvent(
@@ -27,7 +31,7 @@ export class CreateReservationUseCase {
     );
 
     if (!seatBelongsToEvent) {
-      throw new Error("Assento inválido para este evento.");
+      throw new AppError("Assento inválido para este evento.", 400);
     }
 
     const alreadyTaken = await this.reservationRepository.findByEventAndSeat(
@@ -36,7 +40,7 @@ export class CreateReservationUseCase {
     );
 
     if (alreadyTaken) {
-      throw new Error("Este assento já está ocupado.");
+      throw new AppError("Este assento já está ocupado.", 409);
     }
 
     const existingReservation = await this.reservationRepository.findByEventAndUser(
@@ -45,15 +49,22 @@ export class CreateReservationUseCase {
     );
 
     if (existingReservation) {
-      throw new Error("Usuário já possui reserva neste evento.");
+      throw new AppError("Usuário já possui reserva neste evento.", 409);
     }
 
-    const reservation = await this.reservationRepository.create({
-      eventId,
-      userId,
-      seatId,
-    });
+    try {
+      const reservation = await this.reservationRepository.create({
+        eventId,
+        userId,
+        seatId,
+      });
 
     return { reservation };
+    } catch {
+      throw new AppError(
+        "Não foi possível concluir a reserva. O assento pode ter acabado de ser ocupado.",
+        409
+      );
+    }
   }
 }

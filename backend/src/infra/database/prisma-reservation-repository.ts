@@ -78,7 +78,7 @@ export class PrismaReservationRepository implements ReservationRepository {
     userId: string;
     newSeatId: string;
   }): Promise<Reservation> {
-    return await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx: any) => {
       const current = await tx.reservation.findFirst({
         where: {
           eventId: params.eventId,
