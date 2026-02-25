@@ -107,4 +107,5 @@ model Reservation {
   seat      EventSeat @relation(fields: [seatId], references: [id])
 
   @@unique([eventId, seatId])
+  @@unique([eventId, userId])
 }

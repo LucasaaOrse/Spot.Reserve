@@ -1,6 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { makeListLocations } from "../../../../main/factories/location/make-getAllLocation";
-import type { Location } from "../../../../domain/entities/location";
 
 export async function listLocationsController(
   request: FastifyRequest,

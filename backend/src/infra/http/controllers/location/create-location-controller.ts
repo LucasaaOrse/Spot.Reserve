@@ -14,7 +14,6 @@ export async function createLocationController(
 
   const { name, address } = createLocationBodySchema.parse(request.body);
 
-  try {
     const createLocation = makeCreateLocation();
 
     const { location } = await createLocation.execute({
@@ -24,10 +23,5 @@ export async function createLocationController(
       maxTables: 1
     });
 
-    return reply.status(201).send({ locationId: location.id });
-  } catch (err) {
-    return reply.status(400).send({
-      message: "Erro ao criar localidade.",
-    });
-  }
+      return reply.status(201).send({ locationId: location.id });
 }

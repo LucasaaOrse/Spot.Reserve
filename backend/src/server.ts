@@ -5,10 +5,18 @@ import { userRoutes } from "./infra/http/routes/user-routes";
 import fastifyJwt from "@fastify/jwt";
 import { locationRoutes } from "./infra/http/routes/location-routes";
 import { eventRoutes } from "./infra/http/routes/event-routes";
+import { invitationRoutes } from "./infra/http/routes/invitation-routes";
+import { setupErrorHandler } from "./infra/http/errors/error-handler";
 
-const app = fastify();
+const app = fastify({
+  logger: true,
+});
 
-// 1. Configuração do Swagger
+// 1. Configuração global de erros
+
+setupErrorHandler(app);
+
+// 2. Configuração do Swagger
 app.register(fastifySwagger, {
   openapi: {
     info: { 
@@ -37,12 +45,13 @@ app.register(fastifySwaggerUi, {
   routePrefix: "/docs",
 });
 
-// 2. Registro das Rotas (Modular)
+// 3. Registro das Rotas (Modular)
 app.register(userRoutes);
 app.register(locationRoutes)
 app.register(eventRoutes)
+app.register(invitationRoutes)
 
-// 3. Inicialização
+// 4. Inicialização
 app.listen({ port: 3333, host: "0.0.0.0" }).then(() => {
   console.log("🚀 Server running on http://localhost:3333");
   console.log("📖 Documentation at http://localhost:3333/docs");

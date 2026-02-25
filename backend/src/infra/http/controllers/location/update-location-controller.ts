@@ -19,7 +19,6 @@ export async function updateLocationController(
   const { id } = paramsSchema.parse(request.params);
   const { name, address } = bodySchema.parse(request.body);
 
-  try {
     const updateLocation = makeUpdateLocation();
 
     const { location } = await updateLocation.execute(id, {
@@ -27,12 +26,7 @@ export async function updateLocationController(
       address,
     });
 
-    return reply.status(200).send({
-      locationId: location.id,
-    });
-  } catch {
-    return reply.status(400).send({
-      message: "Erro ao atualizar localidade.",
-    });
-  }
+return reply.status(200).send({
+    locationId: location.id,
+  });
 }

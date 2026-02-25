@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { AuthenticateUser } from "../../../application/use-cases/authenticate-user";
 import { PrismaUserRepository } from "../../database/prisma-user-repository";
+import { AppError } from "../../../application/errors/app-error";
 
 export async function authenticateController(request: FastifyRequest, reply: FastifyReply) {
   const authenticateBodySchema = z.object({
@@ -11,10 +12,10 @@ export async function authenticateController(request: FastifyRequest, reply: Fas
 
   const { email, password } = authenticateBodySchema.parse(request.body);
 
-  try {
     const userRepository = new PrismaUserRepository();
     const authenticateUser = new AuthenticateUser(userRepository);
 
+    try {
     const { user } = await authenticateUser.execute({ email, password });
 
     // Gera o token contendo a ROLE do usuário
@@ -24,7 +25,7 @@ export async function authenticateController(request: FastifyRequest, reply: Fas
     );
 
     return reply.status(200).send({ token });
-  } catch (err) {
-    return reply.status(400).send({ message: "Invalid credentials." });
+  }  catch {
+    throw new AppError("Invalid credentials.", 401);
   }
 }

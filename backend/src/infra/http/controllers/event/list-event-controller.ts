@@ -5,7 +5,7 @@ export async function listEventsByOrganizerController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { organizerId } = request.query as { organizerId: string };
+  const organizerId = (request.user as any).sub;
 
   const useCase = makeListEvent()
 

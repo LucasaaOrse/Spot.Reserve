@@ -23,15 +23,9 @@ export async function createEventTablesController(
   const { eventId } = paramsSchema.parse(request.params);
   const { tables } = bodySchema.parse(request.body);
 
-  try {
+
     const useCase = makeCreateEventTables();
     const result = await useCase.execute({ eventId, tables });
 
     return reply.status(201).send(result);
-  } catch (err) {
-    if (err instanceof Error) {
-      return reply.status(400).send({ message: err.message });
-    }
-    return reply.status(500).send({ message: "Erro interno ao criar mesas." });
-  }
 }

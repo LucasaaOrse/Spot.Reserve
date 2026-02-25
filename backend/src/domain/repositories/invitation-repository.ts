@@ -1,14 +1,34 @@
-// src/domain/repositories/invitation-repository.ts
+
+
+export type InvitationStatus = "PENDING" | "ACCEPTED";
 export interface Invitation {
   id: string;
   email: string;
   token: string;
   eventId: string;
-  status: 'PENDING' | 'ACCEPTED';
+  guestId: string | null;
+  status: InvitationStatus;
 }
 
 export interface InvitationRepository {
-  create(data: Omit<Invitation, 'id' | 'status'>): Promise<Invitation>;
+  create(data: {
+    email: string;
+    token: string;
+    eventId: string;
+  }): Promise<Invitation>;
   findByToken(token: string): Promise<Invitation | null>;
   findByEmailAndEvent(email: string, eventId: string): Promise<Invitation | null>;
+  accept(params: {
+    invitationId: string;
+    guestId: string;
+  }): Promise<Invitation>;
+   findAcceptedByGuestAndEvent(
+    guestId: string,
+    eventId: string
+  ): Promise<Invitation | null>;
+
+  accept(params: {
+    invitationId: string;
+    guestId: string;
+  }): Promise<Invitation>;
 }

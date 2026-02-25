@@ -6,6 +6,10 @@ import { updateEventController } from "../controllers/event/update-event-control
 import { verifyJWT } from "../middlewares/verify-jwt";
 import { verifyUserRole } from "../middlewares/verify-user-role";
 import { createEventTablesController } from "../controllers/event-table/create-event-tables-controller";
+import { createInvitationController } from "../controllers/invitation/create-invitation-controller";
+import { getEventLayoutController } from "../controllers/event/get-event-layout-controller";
+import { createReservationController } from "../controllers/reservation/create-reservation-controller";
+import { switchReservationSeatController } from "../controllers/reservation/switch-reservation-seat-controller";
 
 // Objeto reutilizável atualizado: trocado spaceId por locationId
 const eventResponseSchema = {
@@ -152,4 +156,192 @@ export async function eventRoutes(app: FastifyInstance) {
   },
   createEventTablesController
 );
+   app.get("/events/:eventId/layout", {
+    schema: {
+      summary: "Obter layout do evento com ocupação de assentos",
+      tags: ["Event"],
+      security: [{ bearerAuth: [] }],
+      params: {
+        type: "object",
+        required: ["eventId"],
+        properties: {
+          eventId: { type: "string", format: "uuid" },
+        },
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            event: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                title: { type: "string" },
+                date: { type: "string", format: "date-time" },
+                location: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    address: { type: "string" },
+                  },
+                },
+                tables: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string" },
+                      name: { type: "string" },
+                      x: { type: "number" },
+                      y: { type: "number" },
+                      seats: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            id: { type: "string" },
+                            label: { type: "string" },
+                            isOccupied: { type: "boolean" },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, getEventLayoutController);
+
+  app.post(
+    "/events/:eventId/invitations",
+    {
+      onRequest: [verifyUserRole("ORGANIZER")],
+      schema: {
+        summary: "Enviar convites para um evento",
+        tags: ["Invitations"],
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: "object",
+          required: ["eventId"],
+          properties: {
+            eventId: { type: "string", format: "uuid" },
+          },
+        },
+        body: {
+          type: "object",
+          required: ["emails"],
+          properties: {
+            emails: {
+              type: "array",
+              minItems: 1,
+              items: { type: "string", format: "email" },
+            },
+          },
+        },
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              created: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    email: { type: "string" },
+                    token: { type: "string" },
+                  },
+                },
+              },
+              skipped: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    email: { type: "string" },
+                    reason: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    createInvitationController
+  );
+
+
+  app.post(
+    "/events/:eventId/reservations",
+    {
+      onRequest: [verifyUserRole("GUEST")],
+      schema: {
+        summary: "Reservar assento em evento",
+        tags: ["Reservations"],
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: "object",
+          required: ["eventId"],
+          properties: {
+            eventId: { type: "string", format: "uuid" },
+          },
+        },
+        body: {
+          type: "object",
+          required: ["seatId"],
+          properties: {
+            seatId: { type: "string", format: "uuid" },
+          },
+        },
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              reservationId: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    createReservationController
+  );
+
+  app.patch(
+    "/events/:eventId/reservations/me",
+    {
+      onRequest: [verifyUserRole("GUEST")],
+      schema: {
+        summary: "Trocar assento reservado no evento",
+        tags: ["Reservations"],
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: "object",
+          required: ["eventId"],
+          properties: {
+            eventId: { type: "string", format: "uuid" },
+          },
+        },
+        body: {
+          type: "object",
+          required: ["seatId"],
+          properties: {
+            seatId: { type: "string", format: "uuid" },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              reservationId: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    switchReservationSeatController
+  );
 }

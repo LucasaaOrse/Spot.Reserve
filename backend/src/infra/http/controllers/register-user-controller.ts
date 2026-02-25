@@ -14,16 +14,9 @@ export async function registerUserController(request: FastifyRequest, reply: Fas
   const { name, email, password, role } =
     registerBodySchema.parse(request.body);
 
-  try {
     const registerUser = makeRegisterUser();
 
     await registerUser.execute({ name, email, password, role });
 
     return reply.status(201).send();
-  } catch (err) {
-    if (err instanceof Error) {
-      return reply.status(400).send({ message: err.message });
-    }
-    throw err;
-  }
 }
