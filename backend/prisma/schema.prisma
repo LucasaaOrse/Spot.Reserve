@@ -1,0 +1,110 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// 1. Gestão de Usuários e Permissões
+enum Role {
+  ADMIN       // Você (gestor da plataforma)
+  ORGANIZER   // Empresa/Pessoa que cria o evento
+  GUEST       // Convidado que reserva o assento
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password_hash String
+  name          String
+  role          Role      @default(GUEST)
+  
+  // Relações
+  organizedEvents Event[]   @relation("OrganizerEvents")
+  reservations    Reservation[]
+  invitations     Invitation[]
+  
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+}
+
+model Location {
+  id              String   @id @default(uuid())
+  name            String
+  address         String
+
+  maxTables       Int
+  maxSeatsPerTable Int
+
+  events          Event[]
+}
+
+model Event {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  date         DateTime
+
+  organizerId  String
+  organizer    User      @relation("OrganizerEvents", fields: [organizerId], references: [id])
+
+  locationId   String
+  location     Location  @relation(fields: [locationId], references: [id])
+
+  tables       EventTable[]
+  invitations  Invitation[]
+  reservations Reservation[]
+}
+
+model EventTable {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+
+  name      String
+  coord_x   Int
+  coord_y   Int
+
+  seats     EventSeat[]
+}
+
+model EventSeat {
+  id        String   @id @default(uuid())
+  tableId   String
+  table     EventTable @relation(fields: [tableId], references: [id])
+
+  label     String
+
+  reservations Reservation[]
+}
+
+// 4. Fluxo de Convite e Reserva
+model Invitation {
+  id          String   @id @default(uuid())
+  email       String
+  token       String   @unique // Token único para o link de convite
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  guestId     String?  // Preenchido quando o convidado se cadastrar
+  guest       User?    @relation(fields: [guestId], references: [id])
+  status      String   @default("PENDING") // PENDING, ACCEPTED
+}
+
+model Reservation {
+  id        String   @id @default(uuid())
+
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  seatId    String
+  seat      EventSeat @relation(fields: [seatId], references: [id])
+
+  @@unique([eventId, seatId])
+}
