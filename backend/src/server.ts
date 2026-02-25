@@ -4,7 +4,6 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { userRoutes } from "./infra/http/routes/user-routes";
 import fastifyJwt from "@fastify/jwt";
 import { locationRoutes } from "./infra/http/routes/location-routes";
-import { spaceRoutes } from "./infra/http/routes/space-routes";
 import { eventRoutes } from "./infra/http/routes/event-routes";
 
 const app = fastify();
@@ -41,7 +40,6 @@ app.register(fastifySwaggerUi, {
 // 2. Registro das Rotas (Modular)
 app.register(userRoutes);
 app.register(locationRoutes)
-app.register(spaceRoutes)
 app.register(eventRoutes)
 
 // 3. Inicialização
