@@ -135,50 +135,39 @@ export async function locationRoutes(app: FastifyInstance) {
   }, getByIdLocationController);
 
   app.put(
-    "/locations/:id",
-    {
-      schema: {
-        tags: ["Locations"],
-        summary: "Update a location by id",
-        body: {
-          type: "object",
-          properties: {
-            name: { type: "string", minLength: 3 },
-            address: { type: "string", minLength: 5 },
-            maxTables: { type: "integer", minimum: 1 },
-            maxSeatsPerTable: { type: "integer", minimum: 1 },
+  "/locations/:id",
+  {
+    schema: {
+      tags: ["Locations"],
+      summary: "Update a location by id",
+      body: {
+        type: "object",
+        properties: {
+          name: { type: "string", minLength: 3 },
+          address: { type: "string", minLength: 5 },
+          maxTables: { type: "integer", minimum: 1 },
+          maxSeatsPerTable: { type: "integer", minimum: 1 },
         },
         minProperties: 1,
-        response: {
-          200: {
-            description: "Location updated",
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    locationId: { type: "string" },
-                  },
-                },
-              
-              },
-            },
+      },
+      response: {
+        200: {
+          description: "Location updated",
+          type: "object",
+          properties: {
+            locationId: { type: "string" },
           },
         },
         400: {
-            description: "Location not found",
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    message: { type: "string" },
-                  },
-              },
-            },
+          description: "Location not found",
+          type: "object",
+          properties: {
+            message: { type: "string" },
           },
         },
       },
     },
-  }, updateLocationController );
+  },
+  updateLocationController
+)
 }
