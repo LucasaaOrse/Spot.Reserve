@@ -1,5 +1,12 @@
 import { mockEvents, mockLayout, mockLocations } from "./mock-data";
-import { EventLayout, EventSummary, InvitationResponse, Location } from "./types";
+import {
+  EventCreateInput,
+  EventLayout,
+  EventSummary,
+  InvitationResponse,
+  Location,
+  SessionResponse,
+} from "./types";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
 
@@ -19,7 +26,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(data?.message ?? fallbackMessage);
   }
 
+  if (response.status === 204) {
+    return {} as T;
+  }
+
   return response.json() as Promise<T>;
+}
+
+export async function authenticate(email: string, password: string): Promise<SessionResponse> {
+  return request<SessionResponse>("/sessions", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
 }
 
 export async function listLocations(token?: string): Promise<Location[]> {
@@ -30,6 +48,18 @@ export async function listLocations(token?: string): Promise<Location[]> {
   });
 
   return data.locations;
+}
+
+export async function createEvent(input: EventCreateInput, token?: string): Promise<{ eventId: string }> {
+  if (!token) {
+    return { eventId: `evt-local-${Date.now()}` };
+  }
+
+  return request<{ eventId: string }>("/events", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(input),
+  });
 }
 
 export async function listOrganizerEvents(token?: string): Promise<EventSummary[]> {
@@ -64,5 +94,21 @@ export async function sendInvitations(
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify({ emails }),
+  });
+}
+
+export async function acceptInvitation(token: string, invitationToken: string): Promise<{ eventId: string }> {
+  return request<{ eventId: string }>("/invitations/accept", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ token: invitationToken }),
+  });
+}
+
+export async function createReservation(token: string, eventId: string, seatId: string): Promise<{ reservationId: string }> {
+  return request<{ reservationId: string }>(`/events/${eventId}/reservations`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ seatId }),
   });
 }

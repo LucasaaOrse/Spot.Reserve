@@ -48,3 +48,14 @@ export interface InvitationResponse {
   created: Array<{ email: string; token: string }>;
   skipped: Array<{ email: string; reason: string }>;
 }
+
+export interface SessionResponse {
+  token: string;
+}
+
+export interface EventCreateInput {
+  title: string;
+  description?: string;
+  date: string;
+  locationId: string;
+}
