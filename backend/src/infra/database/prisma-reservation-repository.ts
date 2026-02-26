@@ -59,13 +59,17 @@ export class PrismaReservationRepository implements ReservationRepository {
     return toDomainReservation(reservation);
   }
 
+  async deleteByEventAndUser(eventId: string, userId: string): Promise<void> {
+    await prisma.reservation.deleteMany({
+      where: { eventId, userId },
+    });
+  }
+
   async seatBelongsToEvent(eventId: string, seatId: string): Promise<boolean> {
     const seat = await prisma.eventSeat.findFirst({
       where: {
         id: seatId,
-        table: {
-          eventId,
-        },
+        table: { eventId },
       },
       select: { id: true },
     });
@@ -78,7 +82,7 @@ export class PrismaReservationRepository implements ReservationRepository {
     userId: string;
     newSeatId: string;
   }): Promise<Reservation> {
-    return await prisma.$transaction(async (tx: any) => {
+    return await prisma.$transaction(async (tx) => {
       const current = await tx.reservation.findFirst({
         where: {
           eventId: params.eventId,

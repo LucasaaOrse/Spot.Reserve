@@ -14,6 +14,7 @@ export interface ReservationRepository {
 
   findByEventAndSeat(eventId: string, seatId: string): Promise<Reservation | null>;
   findByEventAndUser(eventId: string, userId: string): Promise<Reservation | null>;
+  deleteByEventAndUser(eventId: string, userId: string): Promise<void>;
 
   seatBelongsToEvent(eventId: string, seatId: string): Promise<boolean>;
 

@@ -5,10 +5,9 @@ export async function listEventsByOrganizerController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const organizerId = (request.user as any).sub;
+  const organizerId = (request.user as { sub: string }).sub;
 
-  const useCase = makeListEvent()
-
+  const useCase = makeListEvent();
   const { events } = await useCase.execute({ organizerId });
 
   return reply.status(200).send(events);

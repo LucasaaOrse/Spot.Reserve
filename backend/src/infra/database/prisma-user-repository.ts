@@ -10,7 +10,20 @@ export class PrismaUserRepository implements UserRepository {
 
     if (!user) return null;
 
-    // Converte o modelo do Prisma para a Entidade de Domínio
+    return new User({
+      id: user.id,           // ← id do banco
+      name: user.name,
+      email: user.email,
+      passwordHash: user.password_hash,
+      role: user.role as UserRole,
+    });
+  }
+
+  async findById(id: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) return null;
+
     return new User({
       id: user.id,
       name: user.name,
@@ -21,8 +34,11 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async create(user: User): Promise<void> {
+    // Usa o id gerado pela entidade de domínio (crypto.randomUUID no User)
+    // para garantir que user.id === id no banco após o create
     await this.prisma.user.create({
       data: {
+        id: user.id,              // ← passa o id do domínio para o banco
         name: user.name,
         email: user.email,
         password_hash: user.passwordHash,
@@ -31,24 +47,15 @@ export class PrismaUserRepository implements UserRepository {
     });
   }
 
-  // Implemente os outros métodos (findById, save) seguindo a mesma lógica
-  async findById(id: string): Promise<User | null> { 
-    const user = await this.prisma.user.findUnique({ where: { id } });
-
-    if (!user) return null;
-
-    // Converte o modelo do Prisma para a Entidade de Domínio
-    return new User({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      passwordHash: user.password_hash,
-      role: user.role as UserRole,
-    });
-
-   }
   async save(user: User): Promise<void> {
-    
-
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: user.name,
+        email: user.email,
+        password_hash: user.passwordHash,
+        role: user.role,
+      },
+    });
   }
 }

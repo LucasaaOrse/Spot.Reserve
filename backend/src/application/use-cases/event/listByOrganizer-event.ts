@@ -1,5 +1,3 @@
-// src/application/use-cases/event/list-events-by-organizer-use-case.ts
-
 import type { EventRepository } from "../../../domain/repositories/event-repository";
 
 interface Request {
@@ -10,9 +8,7 @@ export class ListEventsByOrganizerUseCase {
   constructor(private eventRepository: EventRepository) {}
 
   async execute({ organizerId }: Request) {
-    const events =
-      await this.eventRepository.findManyByOrganizerId(organizerId);
-
+    const events = await this.eventRepository.findManyByOrganizerIdWithDetails(organizerId);
     return { events };
   }
 }

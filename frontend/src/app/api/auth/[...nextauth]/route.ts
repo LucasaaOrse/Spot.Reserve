@@ -7,41 +7,39 @@ const handler = NextAuth({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Senha", type: "password" }
+        password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials) return null
 
-        const response = await fetch("http://localhost:3333/sessions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password
-          })
-        })
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333"}/sessions`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          }
+        )
+
+        if (!response.ok) return null
 
         const data = await response.json()
 
-        if (!response.ok) {
-          return null
-        }
+        if (!data.token) return null
 
-        // seu backend retorna: { token: "..." }
         return {
           id: credentials.email,
           email: credentials.email,
-          accessToken: data.token
+          accessToken: data.token,
         }
-      }
-    })
+      },
+    }),
   ],
 
-  session: {
-    strategy: "jwt"
-  },
+  session: { strategy: "jwt" },
 
   callbacks: {
     async jwt({ token, user }) {
@@ -53,10 +51,14 @@ const handler = NextAuth({
     async session({ session, token }) {
       session.accessToken = token.accessToken as string
       return session
-    }
+    },
   },
 
-  secret: process.env.NEXTAUTH_SECRET
+  pages: {
+    signIn: "/login",
+  },
+
+  secret: process.env.NEXTAUTH_SECRET,
 })
 
 export { handler as GET, handler as POST }

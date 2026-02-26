@@ -215,7 +215,7 @@ export default function HomePage() {
   }, []);
 
   function handleMainAction() {
-    if (!session) { router.push("/auth/login"); return; }
+    if (!session) { router.push("/login"); return; }
     router.push("/organizer");
   }
 
@@ -239,7 +239,7 @@ export default function HomePage() {
 
         <div className="flex items-center gap-2">
           {!session ? (
-            <Button variant="ghost" size="sm" className="text-slate-600" onClick={() => router.push("/auth/login")}>Entrar</Button>
+            <Button variant="ghost" size="sm" className="text-slate-600" onClick={() => router.push("/login")}>Entrar</Button>
           ) : (
             <Button variant="ghost" size="sm" className="text-slate-600" onClick={() => router.push("/organizer")}>Dashboard</Button>
           )}

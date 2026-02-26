@@ -12,18 +12,11 @@ export async function getEventLayoutController(
 
   const { eventId } = paramsSchema.parse(request.params);
 
-  try {
-    const useCase = makeGetEventLayoutUseCase();
-    const result = await useCase.execute(eventId);
+  // currentUserId pode ser null se não estiver autenticado (rota pública)
+  const currentUserId = (request.user as { sub?: string } | undefined)?.sub ?? undefined;
 
-    return reply.status(200).send(result);
-  } catch (err) {
-    if (err instanceof Error) {
-      return reply.status(404).send({ message: err.message });
-    }
+  const useCase = makeGetEventLayoutUseCase();
+  const result = await useCase.execute({ eventId, currentUserId });
 
-    return reply
-      .status(500)
-      .send({ message: "Erro interno ao buscar layout do evento." });
-  }
+  return reply.status(200).send(result);
 }

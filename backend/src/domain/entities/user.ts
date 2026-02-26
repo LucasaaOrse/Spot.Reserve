@@ -12,17 +12,19 @@ export interface UserProps {
 
 export class User {
   private props: UserProps;
+  private _id: string;     // ← id sempre garantido
 
   constructor(props: UserProps) {
-    // Validação de regra de negócio com Zod antes de criar a instância
     const emailSchema = z.string().email();
     emailSchema.parse(props.email);
 
     this.props = props;
+    // Se id vier no props (usuário vindo do banco), usa ele.
+    // Se não vier (novo usuário), gera UUID agora.
+    this._id = props.id ?? crypto.randomUUID();
   }
 
-  // Getters para proteger o acesso
-  get id() { return this.props.id; }
+  get id(): string { return this._id; }   // ← nunca undefined
   get name() { return this.props.name; }
   get email() { return this.props.email; }
   get role() { return this.props.role; }

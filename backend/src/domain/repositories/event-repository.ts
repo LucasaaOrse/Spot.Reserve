@@ -21,11 +21,40 @@ export interface EventLayout {
   }>;
 }
 
+// Dados ricos para listagem do organizador
+export interface EventWithDetails {
+  id: string;
+  title: string;
+  description: string | null;
+  date: Date;
+  organizerId: string;
+  locationId: string;
+  locationName: string;
+  locationAddress: string;
+  maxTables: number;
+  maxSeatsPerTable: number;
+  tablesCount: number;
+  invitationsCount: number;
+  reservationsCount: number;
+}
+
+// Dados do evento com location para o preview do convite
+export interface EventWithLocation {
+  id: string;
+  title: string;
+  description: string | null;
+  date: Date;
+  locationName: string;
+  locationAddress: string;
+}
+
 export interface EventRepository {
   create(event: Event): Promise<void>;
   findById(id: string): Promise<Event | null>;
+  findByIdWithLocation(id: string): Promise<EventWithLocation | null>;
   findManyByOrganizerId(organizerId: string): Promise<Event[]>;
-  findByLocationAndDate(spaceId: string, date: Date): Promise<Event | null>;
+  findManyByOrganizerIdWithDetails(organizerId: string): Promise<EventWithDetails[]>;
+  findByLocationAndDate(locationId: string, date: Date): Promise<Event | null>;
   save(event: Event): Promise<void>;
   delete(id: string): Promise<void>;
   getEventLayout(eventId: string): Promise<EventLayout | null>;
